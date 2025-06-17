@@ -29,7 +29,7 @@ A simple and efficient Bash script to install, update, configure, and run the [X
 
 ```bash
 # Basic usage with a VLESS URI (replace with your actual URI)
-./linv2.sh -vless "vless://UUID@host:port?type=ws&path=%2Fwebsocket&host=example.com" [-socksPort 1080]
+./linv2.sh -vless "vless://UUID@host:port?type=ws&path=%2Fwebsocket&host=example.com" [-socksPort 2080]
 
 # Update Xray-core to the latest version
 ./linv2.sh update
