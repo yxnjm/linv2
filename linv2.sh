@@ -87,115 +87,153 @@ parse_vless_uri() {
 
     /bin/cat > "$CONFIG_FILE" <<EOF
 {
-  "dns": {
-    "disableFallback": true,
-    "servers": [
-      { "address": "https://8.8.8.8/dns-query", "domains": [], "queryStrategy": "" },
-      { "address": "localhost", "domains": [], "queryStrategy": "" }
-    ],
-    "tag": "dns"
-  },
-  "inbounds": [
-    {
-      "listen": "$SOCKS_ADDR",
-      "port": $SOCKS_PORT,
-      "protocol": "socks",
-      "settings": { "udp": true },
-      "sniffing": {
-        "destOverride": ["http", "tls", "quic"],
-        "enabled": true,
-        "metadataOnly": false,
-        "routeOnly": true
-      },
-      "tag": "socks-in"
+    "dns": {
+        "disableFallback": true,
+        "servers": [
+            {
+                "address": "https://8.8.8.8/dns-query",
+                "domains": [],
+                "queryStrategy": ""
+            },
+            {
+                "address": "localhost",
+                "domains": [],
+                "queryStrategy": ""
+            }
+        ],
+        "tag": "dns"
     },
-    {
-      "listen": "$SOCKS_ADDR",
-      "port": $(($SOCKS_PORT + 1)),
-      "protocol": "http",
-      "sniffing": {
-        "destOverride": ["http", "tls", "quic"],
-        "enabled": true,
-        "metadataOnly": false,
-        "routeOnly": true
-      },
-      "tag": "http-in"
-    }
-  ],
-  "log": { "loglevel": "warning" },
-  "outbounds": [
-    {
-      "domainStrategy": "AsIs",
-      "protocol": "vless",
-      "settings": {
-        "vnext": [{
-          "address": "$HOST",
-          "port": $PORT,
-          "users": [{
-            "id": "$UUID",
-            "encryption": "$ENCRYPTION",
-            "flow": ""
-          }]
-        }]
-      },
-      "streamSettings": {
-        "network": "$TYPE",
-        "wsSettings": {
-          "path": "$PATH",
-          "headers": {
-            "Host": "$HOST_HEADER"
-          }
+    "inbounds": [
+        {
+            "listen": "$SOCKS_ADDR",
+            "port": $SOCKS_PORT,
+            "protocol": "socks",
+            "settings": {
+                "udp": true
+            },
+            "sniffing": {
+                "destOverride": [
+                    "http",
+                    "tls",
+                    "quic"
+                ],
+                "enabled": true,
+                "metadataOnly": false,
+                "routeOnly": true
+            },
+            "tag": "socks-in"
+        },
+        {
+            "listen": "$SOCKS_ADDR",
+            "port": $(($SOCKS_PORT + 1)),
+            "protocol": "http",
+            "sniffing": {
+                "destOverride": [
+                    "http",
+                    "tls",
+                    "quic"
+                ],
+                "enabled": true,
+                "metadataOnly": false,
+                "routeOnly": true
+            },
+            "tag": "http-in"
         }
-      },
-      "tag": "proxy"
+    ],
+    "log": {
+        "loglevel": "warning"
     },
-    { "protocol": "freedom", "tag": "direct" },
-    { "protocol": "freedom", "tag": "bypass" },
-    {
-      "protocol": "blackhole",
-      "tag": "block"
+    "outbounds": [
+        {
+            "domainStrategy": "AsIs",
+            "flow": null,
+            "protocol": "vless",
+            "settings": {
+                "vnext": [
+                    {
+                        "address": "$HOST",
+                        "port": $PORT,
+                        "users": [
+                            {
+                                "id": "$UUID",
+                                "encryption": "$ENCRYPTION",
+                                "flow": ""
+                            }
+                        ]
+                    }
+                ]
+            },
+            "streamSettings": {
+                "network": "$TYPE",
+                "wsSettings": {
+                    "headers": {
+                        "Host": "$HOST_HEADER"
+                    },
+                    "path": "$PATH"
+                }
+            },
+            "tag": "proxy"
+        },
+        {
+            "domainStrategy": "",
+            "protocol": "freedom",
+            "tag": "direct"
+        },
+        {
+            "domainStrategy": "",
+            "protocol": "freedom",
+            "tag": "bypass"
+        },
+        {
+            "protocol": "blackhole",
+            "tag": "block"
+        },
+        {
+            "protocol": "dns",
+            "proxySettings": {
+                "tag": "proxy",
+                "transportLayer": true
+            },
+            "settings": {
+                "address": "8.8.8.8",
+                "network": "tcp",
+                "port": 53,
+                "userLevel": 1
+            },
+            "tag": "dns-out"
+        }
+    ],
+    "policy": {
+        "levels": {
+            "1": {
+                "connIdle": 30
+            }
+        },
+        "system": {
+            "statsOutboundDownlink": true,
+            "statsOutboundUplink": true
+        }
     },
-    {
-      "protocol": "dns",
-      "proxySettings": {
-        "tag": "proxy",
-        "transportLayer": true
-      },
-      "settings": {
-        "address": "8.8.8.8",
-        "network": "tcp",
-        "port": 53,
-        "userLevel": 1
-      },
-      "tag": "dns-out"
-    }
-  ],
-  "policy": {
-    "levels": {
-      "1": { "connIdle": 30 }
+    "routing": {
+        "domainStrategy": "AsIs",
+        "rules": [
+            {
+                "inboundTag": [
+                    "socks-in",
+                    "http-in"
+                ],
+                "outboundTag": "dns-out",
+                "port": "53",
+                "type": "field"
+            },
+            {
+                "outboundTag": "proxy",
+                "port": "0-65535",
+                "type": "field"
+            }
+        ]
     },
-    "system": {
-      "statsOutboundDownlink": true,
-      "statsOutboundUplink": true
-    }
-  },
-  "routing": {
-    "domainStrategy": "AsIs",
-    "rules": [
-      {
-        "inboundTag": ["socks-in", "http-in"],
-        "outboundTag": "proxy",
-        "port": "53",
-        "type": "field"
-      },
-      {
-        "outboundTag": "proxy",
-        "port": "0-65535",
-        "type": "field"
-      }
-    ]
-  },
-  "stats": {}
+    "stats": {}
 }
 EOF
 }
