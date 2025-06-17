@@ -246,7 +246,7 @@ run_xray() {
     fi
 
     echo "[*] Starting Xray..."
-    "$XRAY_BIN" run -config "$CONFIG_FILE" &
+    "$XRAY_BIN" run -config "$CONFIG_FILE" > /dev/null 2>&1 &
     echo $! > "$PID_FILE"
     echo "[*] Xray started with PID $(/bin/cat "$PID_FILE")"
 }
