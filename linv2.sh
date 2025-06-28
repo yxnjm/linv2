@@ -85,6 +85,28 @@ parse_vless_uri() {
         esac
     done
 
+    if [[ "$TYPE" == "ws" ]]; then
+        STREAM_SETTINGS=$(cat <<EOF
+{
+    "network": "ws",
+    "wsSettings": {
+        "path": "$PATH",
+        "headers": {
+            "Host": "$HOST_HEADER"
+        }
+    }
+}
+EOF
+)
+    else
+        STREAM_SETTINGS=$(cat <<EOF
+{
+    "network": "tcp"
+}
+EOF
+)
+    fi
+
     /bin/cat > "$CONFIG_FILE" <<EOF
 {
     "dns": {
@@ -163,15 +185,7 @@ parse_vless_uri() {
                     }
                 ]
             },
-            "streamSettings": {
-                "network": "$TYPE",
-                "wsSettings": {
-                    "headers": {
-                        "Host": "$HOST_HEADER"
-                    },
-                    "path": "$PATH"
-                }
-            },
+            "streamSettings": $STREAM_SETTINGS,
             "tag": "proxy"
         },
         {
