@@ -86,7 +86,7 @@ parse_vless_uri() {
     done
 
     if [[ "$TYPE" == "ws" ]]; then
-        STREAM_SETTINGS=$(cat <<EOF
+        STREAM_SETTINGS=$(/bin/cat <<EOF
 {
     "network": "ws",
     "wsSettings": {
@@ -99,7 +99,7 @@ parse_vless_uri() {
 EOF
 )
     else
-        STREAM_SETTINGS=$(cat <<EOF
+        STREAM_SETTINGS=$(/bin/cat <<EOF
 {
     "network": "tcp"
 }
