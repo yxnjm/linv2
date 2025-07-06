@@ -72,6 +72,12 @@ parse_vless_uri() {
     PATH="/"
     HOST_HEADER=""
     ENCRYPTION="none"
+    SECURITY=""
+    PBK=""
+    FP=""
+    SNI=""
+    SID=""
+    MODE=""
 
     IFS='&' read -ra PARAMS <<< "$QUERY"
     for param in "${PARAMS[@]}"; do
@@ -82,6 +88,12 @@ parse_vless_uri() {
             path) PATH=$(printf '%b' "${VALUE//%/\\x}") ;;
             host) HOST_HEADER="$VALUE" ;;
             encryption) ENCRYPTION="$VALUE" ;;
+            security) SECURITY="$VALUE" ;;
+            pbk) PBK="$VALUE" ;;
+            fp) FP="$VALUE" ;;
+            sni) SNI="$VALUE" ;;
+            sid) SID="$VALUE" ;;
+            mode) MODE="$VALUE" ;;
         esac
     done
 
@@ -94,6 +106,27 @@ parse_vless_uri() {
         "headers": {
             "Host": "$HOST_HEADER"
         }
+    }
+}
+EOF
+)
+    elif [[ "$TYPE" == "xhttp" ]]; then
+        STREAM_SETTINGS=$(/bin/cat <<EOF
+{
+    "network": "xhttp",
+    "security": "$SECURITY",
+    "realitySettings": {
+        "show": false,
+        "publicKey": "$PBK",
+        "fingerprint": "$FP",
+        "serverName": "$SNI",
+        "shortId": "$SID",
+        "allowInsecure": false
+    },
+    "xhttpSettings": {
+        "host": "",
+        "mode": "$MODE",
+        "path": "$PATH"
     }
 }
 EOF

@@ -4,6 +4,17 @@ A simple and efficient Bash script to install, update, configure, and run the [X
 
 ---
 
+## 🔧 Installation
+
+To install and run the script:
+
+```bash
+curl -fsSL -o linv2.sh https://raw.githubusercontent.com/yxnjm/linv2/main/linv2.sh
+chmod +x linv2.sh
+```
+
+---
+
 ## Features
 
 - Automatically installs required dependencies (`curl`, `wget`, `unzip`, `jq`) if missing.
@@ -14,6 +25,7 @@ A simple and efficient Bash script to install, update, configure, and run the [X
 - Routes DNS queries through the VLESS proxy.
 - Manages starting and stopping Xray with PID file tracking.
 - Lightweight and easy to use.
+- Supports advanced VLESS configurations including WebSocket (`ws`) and XTLS over HTTP (`xhttp` / Reality).
 
 ---
 
@@ -22,6 +34,7 @@ A simple and efficient Bash script to install, update, configure, and run the [X
 - Linux x86_64 system
 - Bash shell
 - Root or sudo privileges for installing dependencies
+- VLESS URI (supports type=ws and type=xhttp with Reality)
 
 ---
 
@@ -36,3 +49,4 @@ A simple and efficient Bash script to install, update, configure, and run the [X
 
 # Stop the running Xray process
 ./linv2.sh stop
+```
